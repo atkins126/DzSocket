@@ -2,9 +2,10 @@
 
 ## Delphi TCP Socket Client and Server communication with Unicode support
 
-![Delphi Supported Versions](https://img.shields.io/badge/Delphi%20Supported%20Versions-XE2..10.3%20Rio-blue.svg)
+![Delphi Supported Versions](https://img.shields.io/badge/Delphi%20Supported%20Versions-XE3..10.4-blue.svg)
 ![Platforms](https://img.shields.io/badge/Platforms-Win32%20and%20Win64-red.svg)
 ![Auto Install](https://img.shields.io/badge/-Auto%20Install%20App-orange.svg)
+![VCL and FMX](https://img.shields.io/badge/-VCL%20and%20FMX-lightgrey.svg)
 ![Unicode support](https://img.shields.io/badge/-Unicode%20messages%20support-green.svg)
 
 ![Demo Example](images/demo_example.png)
@@ -19,6 +20,36 @@
 - [How to send stream](#how-to-send-stream)
 
 ## What's New
+
+- 02/01/2021 (Version 2.5)
+
+   - Removed Delphi XE2 from the list of environments as it was never possible to compile in this version.
+   - Fixed XE6 conditional directive about JSON, because was incorrectly pointing to XE5.
+
+- 12/18/2020 (Version 2.4)
+
+   - Updated Component Installer app (Fixed call to rsvars.bat when Delphi is installed in a path containing spaces characters).
+
+- 11/28/2020
+
+   - Included new FMX chat demo application.
+
+- 10/31/2020 (Version 2.3)
+
+   - Included Delphi 10.4 auto-install support.
+
+- 10/27/2020 (Version 2.2)
+
+   - Fixed previous Delphi versions (at least on XE2, XE3, XE4 and XE5) package tag. It was causing package compilation error.
+   - Fixed to use JSON unit only when Delphi XE6 or higher.
+
+- 10/26/2020 (Version 2.1)
+
+   - Updated CompInstall to version 2.0 (now supports GitHub auto-update)
+
+- 10/09/2020
+
+   - Changed disregard treatment to occur in Send method instead SendAll / SendAllEx (internally call Send method anyway).
 
 - 10/06/2020
 
@@ -70,7 +101,7 @@ You can do a lot of stuff, like chat app, remote commands app, remote monitoring
 
 - **Commands**: The native socket allows you to send string segment, but if you want to send commands and identify this commands in the other side of the connection, you will need to manually implement this. With DzSocket, you have a Char command always available. Ready, fast and easy.
 
-- **Auto Free Data Objects on Server**: The Client object list available on Server component has a Pointer property, allowing you to store informations about the client connection, usually using a object. With DzSocket, you don't need to worry about this object destruction. You just need to enable a property to take care of these objects.
+- **Auto Free Data Objects on Server**: The Client object list available on Server component has a Pointer property, allowing you to store information about the client connection, usually using a object. With DzSocket, you don't need to worry about this object destruction. You just need to enable a property to take care of these objects.
 
 - **Enumerator**: The native Server component does not have a enumerator to iterate Client List connections. Using DzSocket, you can simply do a `for .. in` directly on Server component, iterating client list connections.
 
@@ -98,7 +129,7 @@ Close Delphi IDE and run **CompInstall.exe** app to auto install component into 
 4. If you want to use Win64 platform, select this platform and Build again.
 5. Add sub-path Win32\Release to the Library paths at Tools\Options using 32-bit option, and if you have compiled to 64 bit platform, add sub-path Win64\Release using 64-bit option.
 
-Supports Delphi XE2..Delphi 10.3 Rio
+Supports Delphi XE3..Delphi 10.4
 
 ## Server Component
 
@@ -318,6 +349,8 @@ Sends commands and messages to the server. You should use `Cmd` parameter to spe
 > Important: The server won't receive messages while client still not authenticated, even if it is already connected.
 
 ## Array data send
+
+**Only available on Delphi XE6 or higher**
 
 When you are using `Send` method from Server or Client socket, there is a `String` parameter allowing you to send data.
 There are two global methods you can use to send multiple data at one time:
