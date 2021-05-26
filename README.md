@@ -8,6 +8,8 @@
 ![VCL and FMX](https://img.shields.io/badge/-VCL%20and%20FMX-lightgrey.svg)
 ![Unicode support](https://img.shields.io/badge/-Unicode%20messages%20support-green.svg)
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C53LVFN)
+
 ![Demo Example](images/demo_example.png)
 
 - [What's New](#whats-new)
@@ -20,6 +22,19 @@
 - [How to send stream](#how-to-send-stream)
 
 ## What's New
+
+- 05/25/2021 (Version 3.0)
+
+   - Redesigned data sending and receiving, using stream and UTF8 encoding, and avoiding receiving overload by using TCriticalSection.
+   - Improved error handling on socket message receiving.
+   - Included automatic reconnection support.
+
+<details>
+  <summary>Click here to view the entire changelog</summary>
+
+- 03/13/2021 (Version 2.6)
+
+   - Removed CompInstall.exe from component sources due to AV false positive warning (now you can get it directly from CompInstall repository).
 
 - 02/01/2021 (Version 2.5)
 
@@ -82,6 +97,8 @@
 - 03/31/2019
 
    - Include support to Unicode characters on commands and messages text
+   
+</details>
 
 ## Description
 
@@ -113,13 +130,17 @@ You can do a lot of stuff, like chat app, remote commands app, remote monitoring
 
 - **Login control**: You can control client authentication/authorization by using simple events and you can send extra data information to control client access to the server.
 
+- **Auto Reconnection**: The client component can auto-reconnect to the server when the connection is lost, just by enabling a property.
+
 And much more! :wink:
 
 ## Installing
 
 ### Auto install
 
-Close Delphi IDE and run **CompInstall.exe** app to auto install component into Delphi.
+1. Download Component Installer from: https://github.com/digao-dalpiaz/CompInstall/releases/latest
+2. Put **CompInstall.exe** into the component repository sources folder.
+3. Close Delphi IDE and run **CompInstall.exe** app.
 
 ### Manual install
 
@@ -141,9 +162,9 @@ Supports Delphi XE3..Delphi 10.4
 
 `KeepAlive: Boolean` = Allow enable KeepAlive socket native resource. This will send a keep-alive signal using KeepAliveInterval property.
 
-`KeepAliveInterval: Integer` = Specify the KeepAlive interval in milliseconds (default 15000 / *15 seconds*).
+`KeepAliveInterval: Integer` = Specifies the KeepAlive interval in milliseconds (default 15000 / *15 seconds*).
 
-`Port: Word` = Specify the Server listen TCP Port. This property is required to start server socket.
+`Port: Word` = Specifies the Server listen TCP Port. This property is required to start server socket.
 
 `Connection[Index: Integer]: TDzSocket` (public) = Returns the TDzSocket client connection object by Index.
 
@@ -266,13 +287,19 @@ Retrieves only authenticated connections count.
 
 ### Client Properties
 
+`AutoReconnect: Boolean` = If enabled, when the client loses connection to the server, the socket will try to reconnect automatically.
+
+`AutoReconnectInterval: Integer` = Specifies the time in milliseconds to wait for a new reconnection attempt (default 10000 / *10 seconds*).
+
+`AutoReconnectAttempts: Integer` = How may times to try to reconnect after connection lost. Leave `0` value to retry infinitely.
+
 `KeepAlive: Boolean` = Allow enable KeepAlive socket native resource. This will send a keep-alive signal using KeepAliveInterval property.
 
-`KeepAliveInterval: Integer` = Specify the KeepAlive interval in milliseconds (default 15000 / *15 seconds*).
+`KeepAliveInterval: Integer` = Specifies the KeepAlive interval in milliseconds (default 15000 / *15 seconds*).
 
-`Host: String` = Specify the IP or Host Name (DNS) to connect to the server. This property is required to connect to the server socket.
+`Host: String` = Specifies the IP or Host Name (DNS) to connect to the server. This property is required to connect to the server socket.
 
-`Port: Word` = Specify the Client connection TCP Port, which the server is listening or the port is mapped. This property is required to connect to the server socket.
+`Port: Word` = Specifies the Client connection TCP Port, which the server is listening or the port is mapped. This property is required to connect to the server socket.
 
 `Connected: Boolean` (public) = Returns true if the connection is established.
 
@@ -326,6 +353,12 @@ procedure OnLoginResponse(Sender: TObject; Socket: TDzSocket; Accepted: Boolean;
 
 This event is triggered when server accepts or rejects the client connection. You can check this result into `Accepted` parameter, and the server may send to the client some data information into `Data` parameter.
 
+```delphi
+procedure OnReconnection(Sender: TObject; Socket: TDzSocket; Attempt: Integer; Cancel: Boolean)
+```
+Occurs when `AutoReconnect` property is enabled and a connection is lost, after the `AutoReconnectInterval` miliseconds. If the attempt to reconnect fails, the event will be triggered successively until a connection is established.
+You can cancel the reconnection attemps by changing `Cancel` property to `True` in reconnection event, or calling `StopReconnection` method.
+
 ### Client Methods
 
 ```delphi
@@ -339,6 +372,12 @@ procedure Disconnect;
 ```
 
 Disconnects from the server.
+
+```delphi
+procedure StopReconnection;
+```
+
+Stops reconnection attemps when `AutoReconnect` is enabled and a connection is lost.
 
 ```delphi
 procedure Send(const Cmd: Char; const A: String = '');
@@ -367,6 +406,8 @@ var
   I: Integer;
   S: String;
 begin
+  I := 123;
+  S := 'Test';
   DzTCPClientTest.Send('M', ArrayToData([I, S]));
 end;
 ```
